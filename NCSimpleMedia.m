@@ -15,7 +15,9 @@
     SBMediaController *mediaController;
     UIImageView *iconView;
     UILabel *titleView;
+    NCDualPressButton *prevButton;
     NCDualPressButton *playButton;
+    NCDualPressButton *nextButton;
 }
 
 + (void)initialize;
@@ -70,7 +72,7 @@
             float buttonHeight = ([self viewHeight] - 48)/2;
 
             // Previous track / Seek backwards button
-            NCDualPressButton *prevButton = [[[NCDualPressButton alloc] initWithFrame:CGRectMake(160 - 24 - 48 - 4, buttonHeight, 48, 48) holdDelay:1.0] autorelease];
+            prevButton = [[NCDualPressButton alloc] initWithFrame:CGRectMake(160 - 24 - 48 - 4, buttonHeight, 48, 48) holdDelay:1.0];
             [prevButton setImage:[UIImage imageNamed:@"MCPrev.png"] forState:UIControlStateNormal];
             [prevButton setImage:[UIImage imageNamed:@"MCPrev_p.png"] forState:UIControlStateHighlighted];
             [prevButton setImage:[UIImage imageNamed:@"MCPrev_d.png"] forState:UIControlStateDisabled];
@@ -92,7 +94,7 @@
             [mainView addSubview:playButton];
 
             // Next track / Seek forwards button
-            NCDualPressButton *nextButton = [[[NCDualPressButton alloc] initWithFrame:CGRectMake(160 + 24 + 4, buttonHeight, 48, 48) holdDelay:1.0] autorelease];
+            nextButton = [[NCDualPressButton alloc] initWithFrame:CGRectMake(160 + 24 + 4, buttonHeight, 48, 48) holdDelay:1.0];
             [nextButton setImage:[UIImage imageNamed:@"MCNext.png"] forState:UIControlStateNormal];
             [nextButton setImage:[UIImage imageNamed:@"MCNext_p.png"] forState:UIControlStateHighlighted];
             [nextButton setImage:[UIImage imageNamed:@"MCNext_d.png"] forState:UIControlStateDisabled];
@@ -124,7 +126,9 @@
     [mainView release];
     [iconView release];
     [titleView release];
+    [prevButton release];
     [playButton release];
+    [nextButton release];
     [super dealloc];
 }
 
@@ -149,6 +153,10 @@
         [playButton setImage:[UIImage imageNamed:@"MCPlay_p.png"] forState:UIControlStateHighlighted];
         [playButton setImage:[UIImage imageNamed:@"MCPlay_d.png"] forState:UIControlStateDisabled];
     }
+
+    [prevButton setEnabled:![mediaController isFirstTrack]];
+    [playButton setEnabled:[mediaController hasTrack]];
+    [nextButton setEnabled:![mediaController isLastTrack]];
 }
 
 - (void)viewDidAppear
