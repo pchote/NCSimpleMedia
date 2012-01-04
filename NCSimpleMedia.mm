@@ -17,8 +17,6 @@
     UILabel *titleView;
     
     NCDualPressButton *playButton;
-    NCDualPressButton *nextButton;
-    NCDualPressButton *prevButton;
 }
 
 + (void)initialize;
@@ -38,10 +36,10 @@
 {
     [iconView release];
     [titleView release];
+    [playButton release];
     [_view release];
     [super dealloc];
 }
-
 
 - (float)viewHeight { return 90; }
 - (UIView *)view 
@@ -68,7 +66,7 @@
 
         // Buttons
         float buttonHeight = ([self viewHeight] - 48)/2;
-        prevButton = [[NCDualPressButton alloc] initWithFrame:CGRectMake(160 - 24 - 48 - 4, buttonHeight, 48, 48) holdDelay:1.0];
+        NCDualPressButton *prevButton = [[[NCDualPressButton alloc] initWithFrame:CGRectMake(160 - 24 - 48 - 4, buttonHeight, 48, 48) holdDelay:1.0] autorelease];
         [prevButton setImage:[UIImage imageNamed:@"MCPrev.png"] forState:UIControlStateNormal];
         [prevButton setImage:[UIImage imageNamed:@"MCPrev_p.png"] forState:UIControlStateHighlighted];
         [prevButton setImage:[UIImage imageNamed:@"MCPrev_d.png"] forState:UIControlStateDisabled];
@@ -86,7 +84,7 @@
                                     holdEndAction:@selector(playPauseHeld:)];
         [_view addSubview:playButton];
 
-        nextButton = [[NCDualPressButton alloc] initWithFrame:CGRectMake(160 + 24 + 4, buttonHeight, 48, 48) holdDelay:1.0];
+        NCDualPressButton *nextButton = [[[NCDualPressButton alloc] initWithFrame:CGRectMake(160 + 24 + 4, buttonHeight, 48, 48) holdDelay:1.0] autorelease];
         [nextButton setImage:[UIImage imageNamed:@"MCNext.png"] forState:UIControlStateNormal];
         [nextButton setImage:[UIImage imageNamed:@"MCNext_p.png"] forState:UIControlStateHighlighted];
         [nextButton setImage:[UIImage imageNamed:@"MCNext_d.png"] forState:UIControlStateDisabled];
@@ -115,21 +113,8 @@
 - (void)nextHeldStart: (NCDualPressButton *)button { [mediaController beginSeek:1]; }
 - (void)nextHeldEnd: (NCDualPressButton *)button { [mediaController endSeek:1]; }
 - (void)nextPressed: (NCDualPressButton *)button { [mediaController changeTrack:1]; }
-- (void)playPauseHeld: (UIGestureRecognizer *)recognizer {}
-- (void)playPausePressed: (UIGestureRecognizer *)recognizer
-{
-    if ([mediaController isPlaying])
-    {
-        [playButton setImage:[UIImage imageNamed:@"MCPause.png"] forState:UIControlStateNormal];
-        [playButton setImage:[UIImage imageNamed:@"MCPause_p.png"] forState:UIControlStateHighlighted];
-        [playButton setImage:[UIImage imageNamed:@"MCPause_d.png"] forState:UIControlStateDisabled];
-    } else {
-        [playButton setImage:[UIImage imageNamed:@"MCPlay.png"] forState:UIControlStateNormal];
-        [playButton setImage:[UIImage imageNamed:@"MCPlay_p.png"] forState:UIControlStateHighlighted];
-        [playButton setImage:[UIImage imageNamed:@"MCPlay_d.png"] forState:UIControlStateDisabled];
-    }
-    [mediaController togglePlayPause];
-}
+- (void)playPausePressed: (NCDualPressButton *)button { [mediaController togglePlayPause]; };
+
 
 - (id)getAppIcon:(id)appId
 {
@@ -140,24 +125,36 @@
 {
     [iconView setImage: [self getAppIcon:[[mediaController nowPlayingApplication] displayIdentifier]]];
     [titleView setText: [mediaController nowPlayingTitle]];
+
+    // Seems to be incorrectly named -- isPlaying returns true if paused
+    if ([mediaController isPlaying])
+    {
+        [playButton setImage:[UIImage imageNamed:@"MCPause.png"] forState:UIControlStateNormal];
+        [playButton setImage:[UIImage imageNamed:@"MCPause_p.png"] forState:UIControlStateHighlighted];
+        [playButton setImage:[UIImage imageNamed:@"MCPause_d.png"] forState:UIControlStateDisabled];
+    } else {
+        [playButton setImage:[UIImage imageNamed:@"MCPlay.png"] forState:UIControlStateNormal];
+        [playButton setImage:[UIImage imageNamed:@"MCPlay_p.png"] forState:UIControlStateHighlighted];
+        [playButton setImage:[UIImage imageNamed:@"MCPlay_d.png"] forState:UIControlStateDisabled];
+    }
 }
 
 - (void)viewDidAppear
 {
     [[NSNotificationCenter defaultCenter]
-        addObserver: self
-        selector:    @selector (updateDisplayInfo:)
-        name:        @"SBMediaNowPlayingChangedNotification" 
-        object:      mediaController];
+        addObserver:self
+           selector: @selector(updateDisplayInfo:)
+               name:@"SBMediaNowPlayingChangedNotification" 
+             object:mediaController];
     [self updateDisplayInfo:nil];
 }
 
 - (void)viewDidDisappear
 {
     [[NSNotificationCenter defaultCenter]
-        removeObserver: self
-        name:        @"SBMediaNowPlayingChangedNotification"
-        object:      mediaController];
+        removeObserver:self 
+                  name:@"SBMediaNowPlayingChangedNotification"
+                object:mediaController];
 }
 
 @end
