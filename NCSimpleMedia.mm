@@ -80,8 +80,8 @@
         [playButton setImage:[UIImage imageNamed:@"MCPlay_p.png"] forState:UIControlStateHighlighted];
         [playButton setImage:[UIImage imageNamed:@"MCPlay_d.png"] forState:UIControlStateDisabled];
         [playButton setTarget:self pressEndAction:@selector(playPausePressed:)
-                                  holdStartAction:@selector(playPauseHeld:)
-                                    holdEndAction:@selector(playPauseHeld:)];
+                                  holdStartAction:nil
+                                    holdEndAction:nil];
         [_view addSubview:playButton];
 
         NCDualPressButton *nextButton = [[[NCDualPressButton alloc] initWithFrame:CGRectMake(160 + 24 + 4, buttonHeight, 48, 48) holdDelay:1.0] autorelease];

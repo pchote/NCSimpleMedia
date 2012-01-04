@@ -82,7 +82,7 @@
         break;
         case UIGestureRecognizerStateEnded:
             [self setForceHighlighted: NO];
-            if (holdRecognizer.state != UIGestureRecognizerStateEnded && target && pressAction)
+            if ((!holdEndAction || holdRecognizer.state != UIGestureRecognizerStateEnded) && target && pressAction)
                 [target performSelector:pressAction withObject: self];
         break;
         default: break;
