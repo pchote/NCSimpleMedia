@@ -5,13 +5,13 @@ include /usr/local/theos/makefiles/common.mk
 LIBRARY_NAME = NCSimpleMedia
 NCSimpleMedia_FILES = NCSimpleMedia.m NCDualPressButton.m
 NCSimpleMedia_INSTALL_PATH = /System/Library/WeeAppPlugins/NCSimpleMedia.bundle
-NCSimpleMedia_FRAMEWORKS = Foundation UIKit AVFoundation MediaPlayer
+NCSimpleMedia_FRAMEWORKS = UIKit
 NCSimpleMedia_PRIVATE_FRAMEWORKS = BulletinBoard
 
 include $(THEOS_MAKE_PATH)/library.mk
 
 after-stage::
 	mv _/System/Library/WeeAppPlugins/NCSimpleMedia.bundle/NCSimpleMedia.dylib _/System/Library/WeeAppPlugins/NCSimpleMedia.bundle/NCSimpleMedia
-#	cp -a *.png _/System/Library/WeeAppPlugins/NCSimpleMedia.bundle/
+	cp -a *.png _/System/Library/WeeAppPlugins/NCSimpleMedia.bundle/
 	cp Info.plist _/System/Library/WeeAppPlugins/NCSimpleMedia.bundle/
 	cp *.strings _/System/Library/WeeAppPlugins/NCSimpleMedia.bundle/

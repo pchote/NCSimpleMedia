@@ -55,7 +55,7 @@
     [self setNeedsDisplay];
 }
 
-- (void)onHold: (UIGestureRecognizer *)recognizer
+- (void)onHold:(UIGestureRecognizer *)recognizer
 {
     switch (recognizer.state)
     {
@@ -73,7 +73,7 @@
     }
 }
 
-- (void)onPressed: (UIGestureRecognizer *)recognizer
+- (void)onPressed:(UIGestureRecognizer *)recognizer
 {
     switch (recognizer.state)
     {
