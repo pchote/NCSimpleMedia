@@ -42,6 +42,8 @@
     [super dealloc];
 }
 
+
+- (float)viewHeight { return 90; }
 - (UIView *)view 
 {
     if (_view == nil)
@@ -51,13 +53,22 @@
         // [mediaController changeTrack:+/-1]; selects next/prev track
         _view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, [self viewHeight])];
         _view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        
+
+        UIImage *bg = [[UIImage imageWithContentsOfFile:@"/System/Library/WeeAppPlugins/StocksWeeApp.bundle/WeeAppBackground.png"] resizableImageWithCapInsets:UIEdgeInsetsMake(4, 4, 4, 4)];
+        UIImageView *bgView = [[UIImageView alloc] initWithImage:bg];
+        bgView.frame = CGRectMake(2, 0, 316, [self viewHeight]);
+        [_view addSubview:bgView];
+        [bgView release];
+
         // Application icon
-        iconView = [[UIImageView alloc] initWithFrame: CGRectMake(10,4,57,57)];
+        float iconSize = 57;
+        float iconMargin = ([self viewHeight] - iconSize)/2;
+        iconView = [[UIImageView alloc] initWithFrame: CGRectMake(iconMargin,iconMargin,iconSize,iconSize)];
         [_view addSubview:iconView];
 
         // Buttons
-        prevButton = [[NCDualPressButton alloc] initWithFrame:CGRectMake(160 - 24 - 48 - 4, 10, 48, 48) holdDelay:1.0];
+        float buttonHeight = ([self viewHeight] - 48)/2;
+        prevButton = [[NCDualPressButton alloc] initWithFrame:CGRectMake(160 - 24 - 48 - 4, buttonHeight, 48, 48) holdDelay:1.0];
         [prevButton setImage:[UIImage imageNamed:@"MCPrev.png"] forState:UIControlStateNormal];
         [prevButton setImage:[UIImage imageNamed:@"MCPrev_p.png"] forState:UIControlStateHighlighted];
         [prevButton setImage:[UIImage imageNamed:@"MCPrev_d.png"] forState:UIControlStateDisabled];
@@ -66,7 +77,7 @@
                                     holdEndAction:@selector(prevHeldEnd:)];
         [_view addSubview:prevButton];
 
-        playButton = [[NCDualPressButton alloc] initWithFrame:CGRectMake(160 - 24, 10, 48, 48) holdDelay:1.0];
+        playButton = [[NCDualPressButton alloc] initWithFrame:CGRectMake(160 - 24, buttonHeight, 48, 48) holdDelay:1.0];
         [playButton setImage:[UIImage imageNamed:@"MCPlay.png"] forState:UIControlStateNormal];
         [playButton setImage:[UIImage imageNamed:@"MCPlay_p.png"] forState:UIControlStateHighlighted];
         [playButton setImage:[UIImage imageNamed:@"MCPlay_d.png"] forState:UIControlStateDisabled];
@@ -75,7 +86,7 @@
                                     holdEndAction:@selector(playPauseHeld:)];
         [_view addSubview:playButton];
 
-        nextButton = [[NCDualPressButton alloc] initWithFrame:CGRectMake(160 + 24 + 4, 10, 48, 48) holdDelay:1.0];
+        nextButton = [[NCDualPressButton alloc] initWithFrame:CGRectMake(160 + 24 + 4, buttonHeight, 48, 48) holdDelay:1.0];
         [nextButton setImage:[UIImage imageNamed:@"MCNext.png"] forState:UIControlStateNormal];
         [nextButton setImage:[UIImage imageNamed:@"MCNext_p.png"] forState:UIControlStateHighlighted];
         [nextButton setImage:[UIImage imageNamed:@"MCNext_d.png"] forState:UIControlStateDisabled];
@@ -85,7 +96,8 @@
         [_view addSubview:nextButton];
 
         // Playing title
-        titleView = [[UILabel alloc] initWithFrame:CGRectMake(0,65,320,15)];
+        float textPosition = [self viewHeight] - 18;
+        titleView = [[UILabel alloc] initWithFrame:CGRectMake(7,textPosition,306,15)];
         titleView.font = [UIFont boldSystemFontOfSize:12];
         titleView.textColor = [UIColor whiteColor];
         titleView.backgroundColor = [UIColor clearColor];
@@ -124,7 +136,7 @@
     return [(SBIcon *)[[objc_getClass("SBIconModel") sharedInstance] applicationIconForDisplayIdentifier:appId] getIconImage:2];
 }
 
-- (void)updateDisplayInfo
+- (void)updateDisplayInfo: (id)_mediaController
 {
     [iconView setImage: [self getAppIcon:[[mediaController nowPlayingApplication] displayIdentifier]]];
     [titleView setText: [mediaController nowPlayingTitle]];
@@ -132,12 +144,20 @@
 
 - (void)viewDidAppear
 {
-    [self updateDisplayInfo];
+    [[NSNotificationCenter defaultCenter]
+        addObserver: self
+        selector:    @selector (updateDisplayInfo:)
+        name:        @"SBMediaNowPlayingChangedNotification" 
+        object:      mediaController];
+    [self updateDisplayInfo:nil];
 }
 
-- (float)viewHeight
+- (void)viewDidDisappear
 {
-    return 80;
+    [[NSNotificationCenter defaultCenter]
+        removeObserver: self
+        name:        @"SBMediaNowPlayingChangedNotification"
+        object:      mediaController];
 }
 
 @end
