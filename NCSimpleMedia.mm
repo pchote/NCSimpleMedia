@@ -7,6 +7,7 @@
 #import "SBIconModel.h"
 #import "SBIcon.h"
 
+#import "NCDualPressButton.h"
 
 @interface SimpleMediaController : NSObject <BBWeeAppController>
 {
@@ -15,9 +16,9 @@
     UIImageView *iconView;
     UILabel *titleView;
     
-    UIButton *playButton;
-    UIButton *nextButton;
-    UIButton *prevButton;
+    NCDualPressButton *playButton;
+    NCDualPressButton *nextButton;
+    NCDualPressButton *prevButton;
 }
 
 + (void)initialize;
@@ -54,37 +55,40 @@
         // Application icon
         iconView = [[UIImageView alloc] initWithFrame: CGRectMake(10,4,57,57)];
         [_view addSubview:iconView];
-        
+
         // Buttons
-        prevButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [prevButton setFrame:CGRectMake(160 - 24 - 48 - 4, 10, 48, 48)];
+        prevButton = [[NCDualPressButton alloc] initWithFrame:CGRectMake(160 - 24 - 48 - 4, 10, 48, 48) holdDelay:1.0];
         [prevButton setImage:[UIImage imageNamed:@"MCPrev.png"] forState:UIControlStateNormal];
         [prevButton setImage:[UIImage imageNamed:@"MCPrev_p.png"] forState:UIControlStateHighlighted];
         [prevButton setImage:[UIImage imageNamed:@"MCPrev_d.png"] forState:UIControlStateDisabled];
-        [prevButton addTarget:self action:@selector(prevPushed:) forControlEvents:UIControlEventTouchUpInside];
+        [prevButton setTarget:self pressEndAction:@selector(prevPressed:)
+                                  holdStartAction:@selector(prevHeldStart:)
+                                    holdEndAction:@selector(prevHeldEnd:)];
         [_view addSubview:prevButton];
 
-        playButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [playButton setFrame:CGRectMake(160 - 24, 10, 48, 48)];
+        playButton = [[NCDualPressButton alloc] initWithFrame:CGRectMake(160 - 24, 10, 48, 48) holdDelay:1.0];
         [playButton setImage:[UIImage imageNamed:@"MCPlay.png"] forState:UIControlStateNormal];
         [playButton setImage:[UIImage imageNamed:@"MCPlay_p.png"] forState:UIControlStateHighlighted];
         [playButton setImage:[UIImage imageNamed:@"MCPlay_d.png"] forState:UIControlStateDisabled];
-        [playButton addTarget:self action:@selector(playPausePushed:) forControlEvents:UIControlEventTouchUpInside];
+        [playButton setTarget:self pressEndAction:@selector(playPausePressed:)
+                                  holdStartAction:@selector(playPauseHeld:)
+                                    holdEndAction:@selector(playPauseHeld:)];
         [_view addSubview:playButton];
 
-        nextButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [nextButton setFrame:CGRectMake(160 + 24 + 4, 10, 48, 48)];
+        nextButton = [[NCDualPressButton alloc] initWithFrame:CGRectMake(160 + 24 + 4, 10, 48, 48) holdDelay:1.0];
         [nextButton setImage:[UIImage imageNamed:@"MCNext.png"] forState:UIControlStateNormal];
         [nextButton setImage:[UIImage imageNamed:@"MCNext_p.png"] forState:UIControlStateHighlighted];
         [nextButton setImage:[UIImage imageNamed:@"MCNext_d.png"] forState:UIControlStateDisabled];
-        [nextButton addTarget:self action:@selector(nextPushed:) forControlEvents:UIControlEventTouchUpInside];
+        [nextButton setTarget:self pressEndAction:@selector(nextPressed:)
+                                  holdStartAction:@selector(nextHeldStart:)
+                                    holdEndAction:@selector(nextHeldEnd:)];
         [_view addSubview:nextButton];
 
         // Playing title
-        titleView = [[UILabel alloc] initWithFrame:CGRectMake(0,65,320,10)];
+        titleView = [[UILabel alloc] initWithFrame:CGRectMake(0,65,320,15)];
         titleView.font = [UIFont boldSystemFontOfSize:12];
-        titleView.backgroundColor = [UIColor clearColor];
         titleView.textColor = [UIColor whiteColor];
+        titleView.backgroundColor = [UIColor clearColor];
         titleView.textAlignment = UITextAlignmentCenter;
         titleView.numberOfLines = 1;
         [_view addSubview:titleView];
@@ -93,9 +97,15 @@
     return _view;
 }
 
-- (void)playPausePushed: (id)sender
+- (void)prevHeldStart: (NCDualPressButton *)button { [mediaController beginSeek:-1]; }
+- (void)prevHeldEnd: (NCDualPressButton *)button { [mediaController endSeek:-1]; }
+- (void)prevPressed: (NCDualPressButton *)button { [mediaController changeTrack:-1]; }
+- (void)nextHeldStart: (NCDualPressButton *)button { [mediaController beginSeek:1]; }
+- (void)nextHeldEnd: (NCDualPressButton *)button { [mediaController endSeek:1]; }
+- (void)nextPressed: (NCDualPressButton *)button { [mediaController changeTrack:1]; }
+- (void)playPauseHeld: (UIGestureRecognizer *)recognizer {}
+- (void)playPausePressed: (UIGestureRecognizer *)recognizer
 {
-    [mediaController togglePlayPause];
     if ([mediaController isPlaying])
     {
         [playButton setImage:[UIImage imageNamed:@"MCPause.png"] forState:UIControlStateNormal];
@@ -106,19 +116,8 @@
         [playButton setImage:[UIImage imageNamed:@"MCPlay_p.png"] forState:UIControlStateHighlighted];
         [playButton setImage:[UIImage imageNamed:@"MCPlay_d.png"] forState:UIControlStateDisabled];
     }
-    
+    [mediaController togglePlayPause];
 }
-
-- (void)prevPushed: (id)sender
-{
-    [mediaController changeTrack:-1];
-}
-
-- (void)nextPushed: (id)sender
-{
-    [mediaController changeTrack:1];
-}
-
 
 - (id)getAppIcon:(id)appId
 {
@@ -135,7 +134,6 @@
 {
     [self updateDisplayInfo];
 }
-
 
 - (float)viewHeight
 {
