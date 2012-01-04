@@ -6,6 +6,8 @@
 #import "SBApplication.h"
 #import "SBIconModel.h"
 #import "SBIcon.h"
+#import "SBUIController.h"
+#import "SBBulletinListController.h"
 
 #import "NCDualPressButton.h"
 
@@ -13,7 +15,8 @@
 {
     UIView *mainView;
     SBMediaController *mediaController;
-    UIImageView *iconView;
+    SBIcon *activeAppIcon;
+    NCDualPressButton *iconButton;
     UILabel *titleView;
     NCDualPressButton *prevButton;
     NCDualPressButton *playButton;
@@ -25,7 +28,6 @@
 - (float)viewHeight;
 - (void)viewDidAppear;
 - (void)viewDidDisappear;
-- (id)getAppIcon:(id)appId;
 - (void)updateDisplayInfo:(id)mediaController;
 
 @end
@@ -61,10 +63,12 @@
         {
             float iconSize = 57;
             float iconMargin = ([self viewHeight] - iconSize)/2;
-            iconView = [[UIImageView alloc] initWithFrame: CGRectMake(iconMargin,iconMargin,iconSize,iconSize)];
-            iconView.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-
-            [mainView addSubview:iconView];
+            CGRect iconFrame = CGRectMake(iconMargin,iconMargin,iconSize,iconSize);
+            iconButton = [[NCDualPressButton alloc] initWithFrame: iconFrame holdDelay:1.0];
+            [iconButton setTarget:self pressEndAction:@selector(appIconPressed:)
+                                      holdStartAction:nil
+                                        holdEndAction:nil];
+            [mainView addSubview:iconButton];
         }
 
         // Central buttons
@@ -124,7 +128,7 @@
 - (void)dealloc
 {
     [mainView release];
-    [iconView release];
+    [iconButton release];
     [titleView release];
     [prevButton release];
     [playButton release];
@@ -132,14 +136,19 @@
     [super dealloc];
 }
 
-- (id)getAppIcon:(id)appId
+- (SBIcon *)activeMediaApp
 {
-    return [(SBIcon *)[[objc_getClass("SBIconModel") sharedInstance] applicationIconForDisplayIdentifier:appId] getIconImage:2];
+    id appId = [[mediaController nowPlayingApplication] displayIdentifier];
+    if (appId == nil)
+        appId = @"com.apple.mobileipod";
+    return [[objc_getClass("SBIconModel") sharedInstance] applicationIconForDisplayIdentifier:appId];
 }
 
 - (void)updateDisplayInfo:(id)_mediaController
 {
-    [iconView setImage: [self getAppIcon:[[mediaController nowPlayingApplication] displayIdentifier]]];
+    activeAppIcon = [self activeMediaApp];
+    // TODO: Work out what image frame we want to use in different situations
+    [iconButton setImage:[activeAppIcon getIconImage:2] forState:UIControlStateNormal];
     [titleView setText: [mediaController nowPlayingTitle]];
 
     // Seems to be incorrectly named -- isPlaying returns true if paused
@@ -183,6 +192,11 @@
 - (void)nextHeldStart:(NCDualPressButton *)button { [mediaController beginSeek:1]; }
 - (void)nextHeldEnd:(NCDualPressButton *)button { [mediaController endSeek:1]; }
 - (void)nextPressed:(NCDualPressButton *)button { [mediaController changeTrack:1]; }
-- (void)playPausePressed:(NCDualPressButton *)button { [mediaController togglePlayPause]; };
-
+- (void)playPausePressed:(NCDualPressButton *)button { [mediaController togglePlayPause]; }
+- (void)appIconPressed:(NCDualPressButton *)button
+{
+    [(SBUIController*)[objc_getClass("SBUIController") sharedInstance] activateApplicationFromSwitcher:[activeAppIcon application]];
+    // The dropdown doesn't dismiss if the app was already open, so explicitly close it
+    [[objc_getClass("SBBulletinListController") sharedInstance] hideListViewAnimated:YES];
+}
 @end
