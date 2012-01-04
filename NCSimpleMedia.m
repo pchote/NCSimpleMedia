@@ -26,21 +26,7 @@
 
 @implementation SimpleMediaController
 
-
-+ (void)initialize
-{
-    
-}
-
-- (void)dealloc
-{
-    [iconView release];
-    [titleView release];
-    [playButton release];
-    [_view release];
-    [super dealloc];
-}
-
++ (void)initialize {}
 - (float)viewHeight { return 90; }
 - (UIView *)view 
 {
@@ -107,14 +93,14 @@
     return _view;
 }
 
-- (void)prevHeldStart: (NCDualPressButton *)button { [mediaController beginSeek:-1]; }
-- (void)prevHeldEnd: (NCDualPressButton *)button { [mediaController endSeek:-1]; }
-- (void)prevPressed: (NCDualPressButton *)button { [mediaController changeTrack:-1]; }
-- (void)nextHeldStart: (NCDualPressButton *)button { [mediaController beginSeek:1]; }
-- (void)nextHeldEnd: (NCDualPressButton *)button { [mediaController endSeek:1]; }
-- (void)nextPressed: (NCDualPressButton *)button { [mediaController changeTrack:1]; }
-- (void)playPausePressed: (NCDualPressButton *)button { [mediaController togglePlayPause]; };
-
+- (void)dealloc
+{
+    [iconView release];
+    [titleView release];
+    [playButton release];
+    [_view release];
+    [super dealloc];
+}
 
 - (id)getAppIcon:(id)appId
 {
@@ -156,5 +142,13 @@
                   name:@"SBMediaNowPlayingChangedNotification"
                 object:mediaController];
 }
+
+- (void)prevHeldStart: (NCDualPressButton *)button { [mediaController beginSeek:-1]; }
+- (void)prevHeldEnd: (NCDualPressButton *)button { [mediaController endSeek:-1]; }
+- (void)prevPressed: (NCDualPressButton *)button { [mediaController changeTrack:-1]; }
+- (void)nextHeldStart: (NCDualPressButton *)button { [mediaController beginSeek:1]; }
+- (void)nextHeldEnd: (NCDualPressButton *)button { [mediaController endSeek:1]; }
+- (void)nextPressed: (NCDualPressButton *)button { [mediaController changeTrack:1]; }
+- (void)playPausePressed: (NCDualPressButton *)button { [mediaController togglePlayPause]; };
 
 @end

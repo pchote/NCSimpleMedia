@@ -3,7 +3,7 @@ SDKVERSION = 5.0
 include /usr/local/theos/makefiles/common.mk
 
 LIBRARY_NAME = NCSimpleMedia
-NCSimpleMedia_FILES = NCSimpleMedia.mm NCDualPressButton.m
+NCSimpleMedia_FILES = NCSimpleMedia.m NCDualPressButton.m
 NCSimpleMedia_INSTALL_PATH = /System/Library/WeeAppPlugins/NCSimpleMedia.bundle
 NCSimpleMedia_FRAMEWORKS = Foundation UIKit AVFoundation MediaPlayer
 NCSimpleMedia_PRIVATE_FRAMEWORKS = BulletinBoard
